@@ -9,53 +9,63 @@
       <button class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded" @click="signUp()">SIGN UP</button>
     </div>
   </template>
-      <script>
+  <script>
+
 import axios from 'axios'
+import {toast} from 'vue3-toastify'
 import { useMyStore } from '@/store/navbar.js'
+  export default {
+    name: 'SignUp',
+    data()
+    {
+    return{
+      name:'',
+      email:'',
+      password:'',
+    }
+    },
+    methods: {
+  async signUp(){
+  try {
+      let result = await axios.post("http://127.0.0.1:8000/api/register", {
+        name: this.name, 
+        email: this.email,
+        password: this.password,
+      });
+      if(result.status == 201){
+      const userStore = useMyStore();
+      localStorage.setItem("user-token", JSON.stringify(result.data.token));
+      userStore.setUserInfo();
+      this.$router.push({name:'Main'});
+      }
+  } catch(error){
+      if (error.response) {
+        if (error.response.status == 401) {
+          this.incorrectCredsToast();
+        } else {
+          toast.error('An unexpected error occurred. Please try again later.',{
+          autoClose:4000,
+          });
+        }
+      } else {
+        toast.error('Could not reach the server. Please check your connection or try again later.',{
+          autoClose:4000,
+        });
+      }
+    }
+  }
+},
 
-       export default {
-         name: 'SignUp',
-         data()
-         {
-          return{
-            name:'',
-            email:'',
-            password:'',
-          }
-         },
-         methods: {
-       async signUp()
-       
-          {
-            let result = await axios.post("http://127.0.0.1:8000/api/register", {
-              name: this.name, 
-              email: this.email,
-              password: this.password,
-            });
-            if(result.status == 201)
-            {
-            const userStore = useMyStore();
+    mounted(){
+    let user = localStorage.getItem('user-token');
+    if(user){
+      this.$router.push({name:'Main'});
+    }
+    }
+  }
+  </script>
+  <!-- Add "scoped" attribute to limit CSS to this component only -->
+  <style scoped>
 
-            localStorage.setItem("user-token", JSON.stringify(result.data.token));
-            userStore.setUserInfo();
-            this.$router.push({name:'Main'});
-            }
-          
-          }
-         },
-         mounted()
-         {
-          let user = localStorage.getItem('user-token');
-          if(user)
-          {
-                 this.$router.push({name:'Main'});
-          }
-         }
-       }
-       </script>
-       
-       <!-- Add "scoped" attribute to limit CSS to this component only -->
-       <style scoped>
+  </style>
   
-       </style>
-       

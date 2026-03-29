@@ -1,9 +1,7 @@
 <template>
-
 <NavbarItem/>
   <br>
   <router-view/>
-
   <!-- <FooterItem/> -->
 </template>
 
@@ -16,9 +14,7 @@ export default {
   components: {
     NavbarItem,
     // FooterItem,
-   
   },
-
 }
 </script>
 

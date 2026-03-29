@@ -1,40 +1,5 @@
 <template>
-<!-- 
-<br>
-  <h1>My Account</h1>
-  <br>
-  <div class="container">
-        <div class="row">
-          <div class="col-md-6">
-            <div class=" my-3 pt-2 pb-2 ">
-              <div>
-                
-               <h5>PROFILE PICTURE</h5>
-                <img :src="picture" alt="IMAGE" id="img" class="rounded-circle ms-60" ><br><br>
-                <input type="file" @change="handleFileUpload" />
-  <br>
-                <button class="btn btn-success" v-on:click="changePicture()">CHANGE</button>
-  
-              </div>
-            </div>
-          </div>
-  <div class="col-md-6">
-            <div class=" my-3 pt-2 pb-2 ">
-              <div class=" ps-5 ">
-             <h5>ACCOUNT DETAILS </h5>
-            <div class=" ps-6 text-start"> 
-             <b>
-                Name: {{name}} <br>
-                Email: {{email}}
-              </b>
-              </div>  
-              </div>
-            </div>
-          </div>
-  
-        </div>
-      </div> -->
-      <div class="flex flex-row justify-between">
+<div class="flex flex-row justify-between">
   <div class="w-1/2 p-4">
     <h1 class="text-2xl font-bold mb-4 mr-8 mt-20">Profile Picture</h1>
     <img :src="picture" alt="IMAGE" class="rounded-full ms-80 w-60 h-60 mb-4">
@@ -135,12 +100,7 @@ export default{
 
 <style scoped>
 #img{
-
-width: 190px; 
-height: 200px;
-
+  width: 190px; 
+  height: 200px;
 }
-
-
-
 </style>

@@ -14,69 +14,63 @@ import { useMyStore } from '@/store/navbar.js'
 import {toast} from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
-        export default {
-          name: 'LoginComponent',
-          data()
-          {
-            return {
-                email: '',
-                password: '',
-            }
-
-          },
-          methods:{
-            incorrectCredsToast()
-            {
-              toast.error('Incorrect email or password',{
-                autoClose:2000,
-              });
-
-            },
-
-             async login()
-       
-          {
-            try{
-            let result = await axios.post("http://127.0.0.1:8000/api/login", {
-              email: this.email,
-              password: this.password,
-            });
-
-            if(result.status == 200)
-            {
+  export default {
+    name: 'LoginComponent',
+    data(){
+      return {
+          email: '',
+          password: '',
+      }
+    },
+    methods:{
+      incorrectCredsToast()
+      {
+        toast.error('Incorrect email or password',{
+          autoClose:2000,
+        });
+      },
+    
+    async login() {
+      try {
+        let result = await axios.post("http://127.0.0.1:8000/api/login", {
+          email: this.email,
+          password: this.password,
+        });
+          if(result.status == 200){
             const userStore = useMyStore();
-           localStorage.setItem("user-token", JSON.stringify(result.data.token));
-           userStore.setUserInfo();
-           this.$router.push({name:'Main'});
-            }
-            }
-            catch(error){
-
-              if (error.response.status == 401) {
-                this.incorrectCredsToast();
-               }
-              
-            }
-          
+            localStorage.setItem("user-token", JSON.stringify(result.data.token));
+            userStore.setUserInfo();
+            this.$router.push({name:'Main'});
+          } 
+      }
+        catch(error){
+        if (error.response) {
+          if (error.response.status == 401) {
+            this.incorrectCredsToast();
+          } else {
+            toast.error('An unexpected error occurred. Please try again later.',{
+            autoClose:4000,
+            });
           }
-        
-
-          },
-            mounted()
-          {
-            let user = localStorage.getItem('user-token');
-            if(user)
-            {
-              this.$router.push({name:'Main'});
-            }
-          }
+        } else {
+          toast.error('Could not reach the server. Please check your connection or try again later.',{
+            autoClose:4000,
+          });
+        }
      }
+    }
+  },
+      mounted(){
+      let user = localStorage.getItem('user-token');
+      if(user)
+      {
+        this.$router.push({name:'Main'});
+      }
+    }
+  }
+</script>
 
-
-        </script>
-        
-        <!-- Add "scoped" attribute to limit CSS to this component only -->
-        <style scoped>
-
-        </style>
-        
+  <!-- Add "scoped" attribute to limit CSS to this component only -->
+  <style scoped>
+  </style>
+  
