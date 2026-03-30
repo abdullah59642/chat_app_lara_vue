@@ -1,14 +1,12 @@
 <template>         
-     <div v-if="chatId == 0" class=" h-[45rem] relative w-full p-6 overflow-y-auto">             
-       <ul class="space-y-2 font-medium mt-80">     
+  <div v-if="chatId == 0" class="mt-40 relative w-full p-6">             
+       <ul class="font-medium">     
         No chats selected
       </ul>
  </div>
 
-
-
  <!-- SHOWING THIS DIV IF THE CHAT IS SELECTED -->
-    <div  v-if="chatId > 0  && selectedConversationData.receiver_inverse_relation && selectedConversationData.sender_inverse_relation">
+<div v-if="chatId > 0  && selectedConversationData.receiver_inverse_relation && selectedConversationData.sender_inverse_relation">
  <div class="relative flex items-center p-3 border-b border-gray-300 ">
   <div v-if="userId === selectedConversationData.receiver_inverse_relation.id" class="flex items-center">         
         <img   class="h-[48px] ms-1 object-cover w-12 rounded-full" :src="selectedConversationData.sender_inverse_relation.image"> 
@@ -17,10 +15,10 @@
   <div class="flex items-center" v-else>
   <img   class="h-[48px] object-cover w-12 ms-1 rounded-full" :src="selectedConversationData.receiver_inverse_relation.image">          
             <span  class="block ml-2 font-bold text-gray-600">{{ selectedConversationData.receiver_inverse_relation.name}}</span>
-  </div>
+            </div>
           </div>   
         </div>          
-      <div v-if="chatId > 0" ref="chatContainer" class=" h-[45rem] relative w-full p-6 overflow-auto">             
+      <div v-if="chatId > 0" ref="chatContainer" class=" relative w-full p-6 overflow-auto">             
         <ul v-for="messages in chatData" :key="messages.id"  class="space-y-2">            
               <li class="flex justify-end ">
             <div v-if="messages.sender_id == userId" class=" flex px-2 py-1.5   rounded shadow bg-blue-300 break-all">
@@ -34,16 +32,12 @@
              </div>
              </li>
        </ul>
-     
-
 
     <div class="fixed bottom-0 right-0 mr-60 mb-6 w-[800px]  p-6 flex items-center">
-
       <input v-model="message" @keyup.enter="sendMessage()" class="flex-1 border border-gray-500 rounded-full p-2" placeholder="Send message...">
-      <button @click="sendMessage()" class="bg-gray-600 text-xl text-white rounded rounded-full px-4 py-2 ms-1 ">Send</button>
+      <button @click="sendMessage()" class="bg-gray-600 text-xl text-white rounded px-4 py-2 ms-1 ">Send</button>
       </div>
   </div>
-
   
 </template>
 <script>
@@ -72,14 +66,14 @@ watch: {
   }
 },
 
-  methods:{
-    scrollToBottom() {
-    this.$nextTick(() => {
-      if (this.$refs.chatContainer) {
-        this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
-      }
-    });
-  },
+methods:{
+      scrollToBottom() {
+      this.$nextTick(() => {
+        if (this.$refs.chatContainer) {
+          this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
+        }
+      });
+    },
   
     async loadChat()
     {
@@ -95,9 +89,7 @@ watch: {
         if(result.status == 200)
         {
           this.chatData = result.data.messages;
-        
         }
-      
     },
 
    async loadSelectedConversationData()
@@ -114,7 +106,6 @@ watch: {
         if(result.status == 200)
         {
           this.selectedConversationData = result.data.data;
-          
         }
     },
 
@@ -138,12 +129,9 @@ watch: {
     },
   },
 
-async mounted()
-{ 
+async mounted(){ 
   const userStore = useMyStore();
-
-  if(userStore.loginState == true)
-{
+  if(userStore.loginState == true){
   setTimeout(() => {
       this.loadChat();
     }, 100);
@@ -151,14 +139,12 @@ async mounted()
         {
           this.loadSelectedConversationData();
         }
-      
         window.Echo = new Echo({
             broadcaster: 'pusher',
             key: 'b6a4d2642213ed1fa360',
             cluster: 'ap2',
             forceTLS: true,
         });
-
         // Listen for channel events
         window.Echo.channel('chat').listen('MessageSent', (e) => {
             // Handle the received message (e.data) here
@@ -167,12 +153,7 @@ async mounted()
             this.loadChat();
             }
         });
-}
-},
-
-// async beforeUnmount() {
-//     // Stop listening to the channel
-//     window.Echo.leave('chat');
-//   },
+      }
+   },
 }
 </script>

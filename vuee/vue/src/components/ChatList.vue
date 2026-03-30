@@ -5,31 +5,31 @@
 </div>
 
 <div v-if="displayData">
-<ul class="overflow-auto h-[50rem]  ">
+<ul class="overflow-auto">
     <h2 class="my-4 mb-2 ml-2 text-lg text-gray-600">Chats</h2>
     <li>
     <div @click="chatClickEvent(data.id)" v-for="data in chats" :key="data.id" >
-        <a class="flex items-center px-3 py-1 text-sm transition duration-150 ease-in-out border-b border-gray-300 cursor-pointer hover:bg-gray-300 focus:outline-none">
+        <a class="flex items-center py-1 h-20 text-sm border-b border-gray-300 cursor-pointer hover:bg-gray-300 focus:outline-none">
           <div class="w-full">
             <div class="flex justify-between">
               <div v-if="userId != data.sender_inverse_relation.id"  class="flex items-center">
-                <img class="h-[48px] mt-2 w-12 rounded-full"  :src="data.sender_inverse_relation.image" alt="username" />
-                <span class="block ml-2 font-semibold text-gray-600">{{ data.sender_inverse_relation.name }}</span>
+                <img class="h-[48px] w-12 rounded-full"  :src="data.sender_inverse_relation.image" alt="username" />
+                <span class="block font-semibold text-gray-600">{{ data.sender_inverse_relation.name }}</span>
               </div>
               <div v-else  class="flex items-center">
-              <img class="h-[48px] mt-2 w-12 rounded-full" :src="data.receiver_inverse_relation.image"> 
-              <span class="block ml-2 font-semibold text-gray-600">{{ data.receiver_inverse_relation.name }}</span>
+              <img class="h-[18px] w-12 rounded-full" :src="data.receiver_inverse_relation.image"> 
+              <span class="block font-semibold text-gray-600">{{ data.receiver_inverse_relation.name }}</span>
               </div>
 
-              <span class="block ml-2 text-sm text-gray-600">{{data.last_time_message}}</span> 
+              <span class="block text-sm text-gray-600">{{data.last_time_message}}</span> 
             </div>
-            <span class="block ml-2 text-sm py-1 text-gray-600">  
+            <span class="block text-sm py-1 text-gray-600">  
                         {{data.last_message}}
            </span>
     </div>   
    </a> 
   </div>   
-         <div v-if="chats.length == 0" class="text-center text-xl pt-8"> No conversations </div>
+         <div v-if="chats.length == 0" class="text-center pt-8"> No conversations </div>
     </li>
   </ul>
 </div>

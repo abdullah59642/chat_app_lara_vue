@@ -1,8 +1,10 @@
 <template>
-<NavbarItem/>
-  <br>
-  <router-view/>
-  <!-- <FooterItem/> -->
+  <div class="h-screen flex flex-col">
+    <NavbarItem />
+    <div class="flex-1 overflow-hidden">
+      <router-view />
+    </div>
+  </div>
 </template>
 
 <script>

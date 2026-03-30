@@ -1,9 +1,9 @@
 <template>
  <div>
-    <div class="px-12">
-      <div class="min-w-full border rounded lg:grid lg:grid-cols-3 " >
+    <div class="px-2">
+      <div class="min-w-full mt-2 border rounded h-screen lg:grid lg:grid-cols-3" >
           <div class="border-r border-gray-300 lg:col-span-1">
-            <div class="mx-6 my-13">
+            <div class="mx-6">
               <!-- DROPDOWN -->
               <div class="relative text-gray-600" ref="dropdown">
                 <input v-model="search" type="text" class="block border-solid w-full mt-2 py-2 pl-10 bg-gray-200 rounded-full outline-none" name="search"
@@ -20,7 +20,7 @@
                 <div v-if="search && users.length == 0" class="absolute dropdown-menu w-full rounded-xl bg-gray-200 max-h-40 overflow-y-auto">
                     <div class="px-3 py-2 border-bottom">
                         <div class="ml-3">
-                            <span>No Users found!</span>
+                            <span class="text-xs sm:text-sm">No Users found!</span>
                         </div>
                     </div>
                 </div>
@@ -141,4 +141,3 @@ import ChatList from './ChatList.vue'
         },
       }
 </script>
- 
