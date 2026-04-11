@@ -1,8 +1,8 @@
 <template>
-<nav class="bg-gray-600 px-3 text-white py-1">
-    <div class="flex justify-between items-center">
+<nav class="bg-gray-600 px-3 h-10 text-white flex items-center">
+    <div class="flex w-full justify-between items-center">
         <router-link to="/" class="px-2 no-underline text-white">ChatAppLaraVue</router-link>
-        <div class="flex space-x-2">
+        <div class="flex space-x-2 items-center">
             <router-link to="/login" v-if="!isLoggedIn" class="px-1 no-underline text-white">Login</router-link>
             <router-link to="/signup" v-if="!isLoggedIn" class="px-1 no-underline text-white">Signup</router-link>
         </div>
@@ -15,7 +15,7 @@
               </svg>
             </button>
           </div>
-          <div v-if="dropdownOpen" class="absolute right-0  z-50  mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+          <div v-if="dropdownOpen" class="absolute right-0 z-50 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
             <div class="py-1" role="none">
               <router-link to="/account" @click="closeDropDown" class="text-gray-700 block px-4 py-2 text-m no-underline hover:bg-gray-200" role="menuitem" tabindex="-1" id="menu-item-0">My Account</router-link>
               <div v-on:click="logout" @click="closeDropDown" class="cursor-pointer block hover:bg-red-400 px-4 py-2 text-m no-underline text-red-500" role="menuitem" tabindex="-1" id="menu-item-1">Logout</div>

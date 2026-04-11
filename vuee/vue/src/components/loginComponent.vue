@@ -1,10 +1,12 @@
 <template>
   <br>
-  <div class="register flex flex-col items-center">
-    <h1 class="text-4xl font-bold mb-4">LOGIN</h1>
-    <input class="mb-4 p-2 w-80 border border-gray-400 rounded " type="text" v-model="email" placeholder="Enter Name"/>
-    <input class="mb-4 p-2  w-80 border border-gray-400 rounded" type="password" v-model="password" placeholder="Enter Email"/>
-    <button class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded" @click="login()">LOGIN</button>
+  <div class="flex justify-center w-full">
+    <div class="register flex flex-col items-center">
+      <h1 class="text-4xl font-bold mb-4">LOGIN</h1>
+      <input class="mb-4 p-2  border border-gray-400 rounded " type="text" v-model="email" placeholder="Enter Name"/>
+      <input class="mb-4 p-2  border border-gray-400 rounded" type="password" v-model="password" placeholder="Enter Email"/>
+      <button class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded" @click="login()">LOGIN</button>
+    </div>
   </div>
 </template>
         

@@ -1,12 +1,14 @@
 
   <template>
     <br>
-    <div class="register flex flex-col items-center">
+    <div class="flex justify-center w-full">
+    <div class="register flex flex-nowrap flex-col w-[30%] items-center">
       <h1 class="text-4xl font-bold mb-4">SIGN UP</h1>
-      <input class="mb-4 p-2 w-80 border border-gray-400  rounded" type="text" v-model="name" placeholder="Enter Name"/>
-      <input class="mb-4 p-2  w-80 border border-gray-400 rounded" type="text" v-model="email" placeholder="Enter Email"/>
-      <input class="mb-4 p-2 w-80  border border-gray-400 rounded" type="password" v-model="password" placeholder="Enter Password"/>
-      <button class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded" @click="signUp()">SIGN UP</button>
+      <input class="mb-4 p-2  border border-gray-400  rounded" type="text" v-model="name" placeholder="Enter Name"/>
+      <input class="mb-4 p-2  border border-gray-400 rounded" type="text" v-model="email" placeholder="Enter Email"/>
+      <input class="mb-4 p-2  border border-gray-400 rounded" type="password" v-model="password" placeholder="Enter Password"/>
+      <button class="bg-gray-500 flex-nowrap hover:bg-gray-600 text-white py-1 px-2 rounded" @click="signUp()">SIGN UP</button>
+    </div>
     </div>
   </template>
   <script>
