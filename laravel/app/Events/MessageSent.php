@@ -21,16 +21,16 @@ class MessageSent implements ShouldBroadcastNow
 
     // public $user;
     // public $conversation;
-    // public $message;
+    public $message;
     public $conversation;
     /**
      * Create a new event instance.
      */
-    public function __construct(Conversation $conversation)
+    public function __construct(Conversation $conversation, $message)
     {
         // $this->user = $user;
         // $this->conversation = $conversation;
-        // $this->message = $message;
+        $this->message = $message;
         $this->conversation = $conversation;
     }
 
@@ -38,7 +38,7 @@ class MessageSent implements ShouldBroadcastNow
     {
         return [
             'conversation_id' => $this->conversation->id,
-            // 'message' => $this->message->body,
+            'message' => $this->message,
         ];
 
 

@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Response;
+use App\Events\MessageSent;
 use App\Models\Conversation;
 use App\Models\Message;
-use App\Events\MessageSent;
+use App\Models\User;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class createConversation extends Controller
 {
@@ -20,18 +22,16 @@ class createConversation extends Controller
         $checkConversation = Conversation::where('receiver_id',  $user->id)->where('sender_id', $receiverId)->orWhere('receiver_id', $receiverId)->where('sender_id', $user->id)->get();
         if(count($checkConversation) == 0)
         {
-            $createdConversation = Conversation::create(['receiver_id' => $receiverId , 'sender_id' => $user->id, 'last_message' => 'Click to start chat']);
-
+            $createdConversation = Conversation::create([
+                'receiver_id' => $receiverId , 
+                'sender_id' => $user->id, 
+                'last_message' => 'Click to start chat',
+                ]);
             $createMessage = Message::create(['conversation_id'=> $createdConversation->id, 'sender_id' => $user->id]);
-
             $createdConversation->last_time_message = $createMessage->created_at;
             $createdConversation->save();
-
             return response()->json(['SUCCESS', 'CONVERSATION CREATED'], 201);
-        }
-         
-        elseif(count($checkConversation) >= 1)
-        {
+        } elseif(count($checkConversation) >= 1) {
             return response()->json(['MESSAGE', 'CONVERSATION EXISTS'], 402);
         }
     }
@@ -40,7 +40,6 @@ class createConversation extends Controller
     {
         $user = $request->user();
         $conversations = Conversation::with('receiverInverseRelation','senderInverseRelation')->where('receiver_id',  $user->id)->orWhere('sender_id', $user->id)->orderBy('created_at', 'desc')->get();
-       
         return response()->json([
             'chats' => $conversations,
         ], 200);
@@ -49,11 +48,11 @@ class createConversation extends Controller
     public function searchUser(Request $request)
     {
         try{
-        $query = $request->input('query');
-        $users = User::where('name', 'like', '%' . $query . '%')->get();
-        return response()->json(['users' => $users], 200);
-         }catch(Exception $e){
-        return response()->json(['error' => $e->getMessage()], 500);
+            $query = $request->input('query');
+            $users = User::where('name', 'like', '%' . $query . '%')->get();
+            return response()->json(['users' => $users], 200);
+         } catch(Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
          }
     }
 
@@ -71,16 +70,14 @@ class createConversation extends Controller
         $conversation = Conversation::find($conversationId);
         $conversation->update(['last_time_message' => $createdMessage->created_at]);
         $countWords = strlen($message);
-        if($countWords <= 52)
-        {
-        $conversation->update(['last_message' => $message]);
+        if($countWords <= 52){
+            $conversation->update(['last_message' => $message]);
         }
-        elseif($countWords > 52)
-        {
-        $cuttedMessage = Str::limit($message, 35);
-        $conversation->update(['last_message' => $cuttedMessage]);
+        elseif($countWords > 52){
+            $cuttedMessage = Str::limit($message, 35);
+            $conversation->update(['last_message' => $cuttedMessage]);
         }
-            broadcast(new MessageSent($conversation));      
+            broadcast(new MessageSent($conversation, $message))->toOthers();      
     
         return response()->json(['success' => 'Message sent!'], 201);
 
@@ -89,7 +86,6 @@ class createConversation extends Controller
     public function showChat(Request $request, $id)
     {
         $user = $request->user();
-
          $messages = Message::where('conversation_id', $id)
                        ->whereNotNull('body') // Exclude messages where body is null
                        ->orderBy('created_at', 'asc') // Order messages by creation time
@@ -100,14 +96,13 @@ class createConversation extends Controller
 
      public function getAuthUserId(Request $request)
      {
-     try{
-       $user = $request->user();
-       $userId = $user->id;
-       return response()->json(['id' => $userId], 200);
-      } catch(\Exception $e){
-    return response()->json(['error' => 'Something went wrong!'], 500);
-    }
-
+        try{
+            $user = $request->user();
+            $userId = $user->id;
+            return response()->json(['id' => $userId], 200);
+        } catch(Exception $e){
+            return response()->json(['error' => 'Something went wrong!'], 500);
+        }
      }
 
     public function showAccountData(Request $request)
