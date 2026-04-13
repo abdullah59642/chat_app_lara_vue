@@ -5,12 +5,12 @@ export const useMyStore = defineStore({
     state: () => ({
       loginState: false,
       refreshAdmin: false,
+      baseUrl: 'http://127.0.0.1:8000',
     }),
     actions: {
       setUserInfo() {
         this.loginState = true;
       },
-
       refreshAdmin()
       {
         this.refreshAdmin = true;

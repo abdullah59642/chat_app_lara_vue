@@ -18,8 +18,10 @@ import 'vue3-toastify/dist/index.css'
 
   export default {
     name: 'LoginComponent',
+    inheritAttrs: false, 
     data(){
       return {
+          userStore: useMyStore(),
           email: '',
           password: '',
       }
@@ -34,26 +36,29 @@ import 'vue3-toastify/dist/index.css'
     
     async login() {
       try {
-        let result = await axios.post("http://127.0.0.1:8000/api/login", {
+        let result = await axios.post(`${this.userStore.baseUrl}/api/login`, {
           email: this.email,
           password: this.password,
         });
           if(result.status == 200){
-            const userStore = useMyStore();
             localStorage.setItem("user-token", JSON.stringify(result.data.token));
-            userStore.setUserInfo();
+            this.userStore.setUserInfo();
             this.$router.push({name:'Main'});
           } 
       }
         catch(error){
         if (error.response) {
-          if (error.response.status == 401) {
-            this.incorrectCredsToast();
-          } else {
-            toast.error('An unexpected error occurred. Please try again later.',{
-            autoClose:4000,
-            });
-          }
+            if (error.response.status == 401) {
+              this.incorrectCredsToast();
+            } else if(error.response.status == 422){
+              toast.error('Please check the email format and try again.',{
+                autoClose:4000,
+              });
+            } else {
+              toast.error('An unexpected error occurred. Please try again later.',{
+                autoClose:4000,
+              });
+            }
         } else {
           toast.error('Could not reach the server. Please check your connection or try again later.',{
             autoClose:4000,
@@ -64,8 +69,7 @@ import 'vue3-toastify/dist/index.css'
   },
       mounted(){
       let user = localStorage.getItem('user-token');
-      if(user)
-      {
+      if(user){
         this.$router.push({name:'Main'});
       }
     }

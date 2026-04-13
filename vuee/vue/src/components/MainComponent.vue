@@ -1,6 +1,5 @@
 <template>
 <div>
-  <!-- <div v-if="userStore.loginState"> -->
       <div class="flex h-full border rounded">
         <!-- first div -->
             <div class="w-full lg:w-1/3 border-r border-gray-300 flex flex-col h-full">
@@ -25,20 +24,18 @@
                                     </div>
                         </div>
                     </div>
-              <ChatList :userId="userId" @refreshChatListToFalse="chatListToFalse" @chatSelected="handleChatSelected" :refreshChatList="refreshChatList"/>
+              <ChatList v-if="userId" :userId="userId" @chatSelected="handleChatSelected" :refreshChatList="refreshChatList"/>
             </div>
-
             <!-- second div  -->
             <div class="hidden lg:flex-1 lg:flex lg:flex-col h-full">
-                <ChatBox :userId="userId" @refreshChatList="handleRefreshChatList" :chatId="chatId" :key="chatId"/>
+                <ChatBox :userId="userId" @refreshChatListFromChatBox="handleRefreshChatList" :chatId="chatId" :key="chatId"/>
             </div>
             <!-- main div end -->
              <!-- if on mobile show chatbox as overlay on chatlist -->
              <div v-if="chatId !== 0 && isMobile" class="fixed inset-0 z-[9999] bg-white flex flex-col">
-                <ChatBox :userId="userId" @refreshChatList="handleRefreshChatList" :chatId="chatId" :key="chatId" @closeMobileChat="chatId = 0"/>
+                <ChatBox :userId="userId" @refreshChatListFromChatBox="handleRefreshChatList" :chatId="chatId" :key="chatId" @closeMobileChat="chatId = 0"/>
              </div>
         </div>
-    <!-- </div> -->
 </div>
 </template>
      
@@ -46,19 +43,19 @@
 import axios from 'axios';
 import ChatBox from './ChatBox.vue'
 import ChatList from './ChatList.vue'
-import { useMyStore } from '@/store/navbar.js' //here
+import { useMyStore } from '@/store/navbar.js'
     export default {
       name: 'MainComponent',
       data(){
         return {
-          userStore: useMyStore(), //here
+          userStore: useMyStore(),
           isMobile: window.innerWidth < 1024,
           chatId: 0,
           search: '',
           users: [],
           debounceTimer: null,
           userToken: '',
-          refreshChatList: false,
+          refreshChatList: 0,
           userId : 0,
         }
       },
@@ -84,25 +81,19 @@ import { useMyStore } from '@/store/navbar.js' //here
             }
       },
 
-      chatListToFalse()
-      {
-        this.refreshChatList = false;
-      },
-
-      handleRefreshChatList()
-      {
-        this.refreshChatList = true;
-          setTimeout(() => {
-          this.refreshChatList = false;
-          }, 2000); 
-      },
-
       handleChatSelected(payload){
+        // console.log("HERERERER WORKRKRKKRRK");
         this.chatId = payload;
+        //To refresh chatlist again when user clicks on chat
+        this.refreshChatList++;
+      },
+
+      handleRefreshChatList(){
+        this.refreshChatList++;
       },
 
       getUsers(query) {
-        axios.post("http://127.0.0.1:8000/api/searchuser", {
+        axios.post(`${this.userStore.baseUrl}/api/searchuser`, {
           query: query,
         },{
         headers:{
@@ -113,7 +104,7 @@ import { useMyStore } from '@/store/navbar.js' //here
       },
 
       async createConversation(id){
-        let result = await axios.post("http://127.0.0.1:8000/api/createconversation", {
+        let result = await axios.post(`${this.userStore.baseUrl}/api/createconversation`, {
           receiver_id: id,
         },{
         headers:{
@@ -121,11 +112,12 @@ import { useMyStore } from '@/store/navbar.js' //here
           }
         });
           if(result.status == 201){
-            this.refreshChatList = true;
             this.search = '';
           }
+          this.refreshChatList++;
         },
       },
+
 
       async mounted(){
         //check for outside click to hide the dropdown of the users
@@ -139,14 +131,15 @@ import { useMyStore } from '@/store/navbar.js' //here
           this.$router.push({name:'SignUp'});
         } else {
           this.userToken = userToken.replace(/^"(.*)"$/, '$1');
-          let result = await axios.get("http://127.0.0.1:8000/api/getuserid",{
+          let result = await axios.get(`${this.userStore.baseUrl}/api/getuserid`,{
             headers:{
               'Authorization': `Bearer ${this.userToken}`
             }
           });
-          if(result.status == 200)
-          {
+          if(result.status == 200){
               this.userId = result.data.id;
+              // console.log("main check");
+              // console.log(this.userId);
           }
          }
         },

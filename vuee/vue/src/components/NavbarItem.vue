@@ -35,14 +35,14 @@
       data()
       {
         return {
+          userStore: useMyStore(),
           dropdownOpen: false,
         }
       },
   
     computed: {
       isLoggedIn() {
-        const userStore = useMyStore();
-        return userStore.loginState;
+        return this.userStore.loginState;
       }
     },
 
@@ -50,8 +50,7 @@
     {
       let result = localStorage.getItem('user-token');
         if(result) {
-          const userStore = useMyStore();
-          userStore.setUserInfo();
+          this.userStore.setUserInfo();
         }
     },
  
@@ -79,15 +78,15 @@
           try {
             let userToken = localStorage.getItem('user-token');     
             userToken = userToken.replace(/^"(.*)"$/, '$1');
-            await axios.post("http://127.0.0.1:8000/api/logout", {}, {
+            await axios.post(`${this.userStore.baseUrl}/api/logout`, {}, {
               headers: {
                 'Authorization': `Bearer ${userToken}`
               }
             });
             // If the request is successful, clear localStorage, update login state, and redirect
             localStorage.clear();
-            const userStore = useMyStore();
-            userStore.loginState = false;
+            this.userStore.loginState = false;
+            console.log("CAMEEEE");
             window.location.reload();
           } catch (error) {
             console.error('Logout failed:', error);

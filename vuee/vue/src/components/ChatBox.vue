@@ -7,20 +7,20 @@
 
 <!-- SHOWING THIS DIV IF THE CHAT IS SELECTED -->
 <div class="flex flex-col h-full">
-<div v-if="chatId > 0  && selectedConversationData.receiver_inverse_relation && selectedConversationData.sender_inverse_relation">
-          <div class="relative flex items-center p-3 border-b ">
-            <!-- <button @click="hideMobileChatBox()" v-if="isMobile">BACK</button> -->
-            <button @click="hideMobileChatBox()" v-if="isMobile" class="font-bold me-2 text-lg">←</button>
-            <div v-if="userId === selectedConversationData.receiver_inverse_relation.id" class="flex items-center">         
-              <img class="h-[48px] ms-1 object-cover w-12 rounded-full" :src="selectedConversationData.sender_inverse_relation.image"> 
-              <span class="block ml-2 font-bold text-gray-600">{{selectedConversationData.sender_inverse_relation.name}}</span>
-            </div>
-            <div class="flex items-center" v-else>
-              <img class="h-[48px] object-cover w-12 ms-1 rounded-full" :src="selectedConversationData.receiver_inverse_relation.image">
-                <span class="block ml-2 font-bold text-gray-600">{{selectedConversationData.receiver_inverse_relation.name}}</span>
-            </div>
-       </div>
-</div>
+        <div v-if="chatId > 0  && selectedConversationData.receiver_inverse_relation && selectedConversationData.sender_inverse_relation">
+                  <div class="relative flex items-center p-3 border-b ">
+                    <!-- <button @click="hideMobileChatBox()" v-if="isMobile">BACK</button> -->
+                    <button @click="hideMobileChatBox()" v-if="isMobile" class="font-bold me-2 text-lg">←</button>
+                    <div v-if="userId === selectedConversationData.receiver_inverse_relation.id" class="flex items-center">         
+                      <img class="h-[48px] ms-1 object-cover w-12 rounded-full" :src="selectedConversationData.sender_inverse_relation.image"> 
+                      <span class="block ml-2 font-bold text-gray-600">{{selectedConversationData.sender_inverse_relation.name}}</span>
+                    </div>
+                    <div class="flex items-center" v-else>
+                      <img class="h-[48px] object-cover w-12 ms-1 rounded-full" :src="selectedConversationData.receiver_inverse_relation.image">
+                        <span class="block ml-2 font-bold text-gray-600">{{selectedConversationData.receiver_inverse_relation.name}}</span>
+                    </div>
+              </div>
+        </div>
         <div v-if="chatId > 0" ref="chatContainer" class=" bg-gray-300 flex-1 w-full p-6 overflow-auto">
             <ul v-for="messages in chatData" :key="messages.id"  class="space-y-2">
               <li class="flex justify-end">
@@ -53,9 +53,10 @@ window.Pusher = require('pusher-js');
 
 export default {
     name: 'ChatBox',
-    emits: ['refreshChatList', 'closeMobileChat'],
+    emits: ['refreshChatListFromChatBox', 'closeMobileChat'],
     data(){
     return {
+      userStore: useMyStore(),
       isMobile: window.innerWidth < 1024,
       chatData: [],
       message: '',
@@ -84,11 +85,10 @@ methods:{
       this.$emit('closeMobileChat');
     },
   
-    async loadChat()
-    {
+    async loadChat(){
       let userToken = localStorage.getItem('user-token');
         userToken = userToken.replace(/^"(.*)"$/, '$1');
-        let result = await axios.get(`http://127.0.0.1:8000/api/showchat/${this.chatId}`, {
+        let result = await axios.get(`${this.userStore.baseUrl}/api/showchat/${this.chatId}`, {
             headers:{
                 'Authorization': `Bearer ${userToken}`
             }
@@ -104,7 +104,7 @@ methods:{
     {
       let userToken = localStorage.getItem('user-token');
         userToken = userToken.replace(/^"(.*)"$/, '$1');
-        let result = await axios.post("http://127.0.0.1:8000/api/conversationdata", {
+        let result = await axios.post(`${this.userStore.baseUrl}/api/conversationdata`, {
           conversation_id : this.chatId,
         }, {
             headers:{
@@ -117,23 +117,52 @@ methods:{
         }
     },
 
-    async sendMessage()
+    async markConversationAsRead()
     {
       let userToken = localStorage.getItem('user-token');
         userToken = userToken.replace(/^"(.*)"$/, '$1');
-        let result = await axios.post("http://127.0.0.1:8000/api/sendmessage", {
+        await axios.post(`${this.userStore.baseUrl}/api/markChatAsRead`, {
           conversation_id : this.chatId,
-          body: this.message,
+          userId: this.userId,
         }, {
             headers:{
                 'Authorization': `Bearer ${userToken}`
             }
         });
-        if(result.status == 201)
-        {
-          this.message = '';
+    },
+    
+    async sendMessage(){
+      //push the tempMessage to chatData so the sender can see it
+      const tempMessage = {
+        id: Date.now(),
+        body: this.message,
+        sender_id: this.userId,
+      };
+
+      this.chatData.push(tempMessage);
+      // scroll AFTER DOM update
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
+      let message = this.message;
+      this.message = '';
+      let socketId = window.Echo.socketId();
+      let userToken = localStorage.getItem('user-token');
+        userToken = userToken.replace(/^"(.*)"$/, '$1');
+        let result = await axios.post(`${this.userStore.baseUrl}/api/sendmessage`, {
+          conversation_id : this.chatId,
+          body: message,
+          userId: this.userId,
+        }, {
+            headers:{
+                'Authorization': `Bearer ${userToken}`,
+                'X-Socket-Id': socketId
+            }
+        });
+
+        if(result.status == 201){
+          this.$emit('refreshChatListFromChatBox');
         }
-        this.$emit('refreshChatList');
     },
   },
 
@@ -142,13 +171,13 @@ methods:{
     window.addEventListener('resize', () => {
       this.isMobile = window.innerWidth < 1024;
     });
-    const userStore = useMyStore();
-    if(userStore.loginState == true){
+    if(this.userStore.loginState == true){
     setTimeout(() => {
         this.loadChat();
       }, 100);
         if(this.chatId > 0){
             this.loadSelectedConversationData();
+            this.markConversationAsRead();
           }
           window.Echo = new Echo({
               broadcaster: 'pusher',
@@ -158,13 +187,23 @@ methods:{
           });
           // Listen for channel events
           window.Echo.channel('chat').listen('MessageSent', (e) => {
-              // Handle the received message (e.data) here
-              if(this.chatId == e.conversation_id)
-              {
-                this.loadChat();
-              }
-          });
-        }
-    },
-}
+            //refresh chatlist for receiver
+            this.$emit('refreshChatListFromChatBox');
+              // Handle the received message (e.message) here
+              if(this.chatId == e.conversation_id){
+              const tempMessage = {
+                id: Date.now(),
+                body: e.message,
+                receiver_id: this.userId,
+              };
+                this.chatData.push(tempMessage);
+                    // scroll AFTER DOM update
+                    this.$nextTick(() => {
+                      this.scrollToBottom();
+                    });
+                }
+            });
+          }
+      },
+  }
 </script>

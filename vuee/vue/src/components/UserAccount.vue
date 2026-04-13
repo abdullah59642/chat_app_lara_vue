@@ -17,12 +17,14 @@
   </template>
 <script>
 import axios from 'axios'
+import { useMyStore } from '@/store/navbar.js'
+
 export default{
     name: 'UserAccount',
-
     data()
     {
         return{
+            userStore: useMyStore(),
             name: '', 
             email: '',
             picture: '',    
@@ -48,8 +50,8 @@ export default{
       userToken = userToken.replace(/^"(.*)"$/, '$1');
       let formData = new FormData();
       formData.append('image', this.newImage);
-     await axios.post("http://127.0.0.1:8000/api/changepicture",formData, 
-     {
+     await axios.post(`${this.userStore.baseUrl}/api/changepicture`,
+     formData, {
         headers:{
             'Authorization': `Bearer ${userToken}`,
             'Content-Type': 'multipart/form-data'
@@ -60,36 +62,31 @@ export default{
     }
   },
 
- async refreshApiCall()
-      {
-    let userToken = localStorage.getItem('user-token');
-        userToken = userToken.replace(/^"(.*)"$/, '$1');
-         const result = await axios.get("http://127.0.0.1:8000/api/accountdata", {
-          headers:{
-            'Authorization': `Bearer ${userToken}`
-          }
-        }); 
-        this.name = result.data.name;
-        this.email = result.data.email;
-        this.picture = result.data.image;
-      }
-  },
-
-     async mounted()
-      {
-        let userToken = localStorage.getItem('user-token');
-        if(!userToken)
-        {
-          this.$router.push({name:'Home'});
+    async refreshApiCall(){
+          let userToken = localStorage.getItem('user-token');
+            userToken = userToken.replace(/^"(.*)"$/, '$1');
+            const result = await axios.get(`${this.userStore.baseUrl}/api/accountdata`, {
+              headers:{
+                'Authorization': `Bearer ${userToken}`
+              }
+            }); 
+            this.name = result.data.name;
+            this.email = result.data.email;
+            this.picture = result.data.image;
         }
-        else
-       {
+    },
+
+     async mounted(){
+        let userToken = localStorage.getItem('user-token');
+        if(!userToken){
+          this.$router.push({name:'Home'});
+        } else {
         userToken = userToken.replace(/^"(.*)"$/, '$1');
-      const result = await axios.get("http://127.0.0.1:8000/api/accountdata", {
-          headers:{
-            'Authorization': `Bearer ${userToken}`
-          }
-        }); 
+        const result = await axios.get(`${this.userStore.baseUrl}/api/accountdata`, {
+            headers:{
+              'Authorization': `Bearer ${userToken}`
+            }
+          }); 
         this.name = result.data.name;
         this.email = result.data.email;
         this.picture = result.data.image;
