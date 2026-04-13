@@ -14,7 +14,7 @@ class authController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:60',
-            'email' => 'required|unique:users',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string',
         ]);
         $user = User::create([
@@ -28,7 +28,6 @@ class authController extends Controller
             'token' => $sanctumToken,
             'message' => 'Registered Successfully',
         ];
-
         return response($response, 201);
     }
 

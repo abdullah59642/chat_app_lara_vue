@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/getchats', [createConversation::class, 'getConversations']);
+    Route::post('/markChatAsRead', [createConversation::class, 'markConversationAsRead']);
     Route::post('/createconversation', [createConversation::class, 'createConversation']);
     Route::get('/getuserid', [createConversation::class, 'getAuthUserId']);
     Route::post('/conversationdata', [createConversation::class, 'getConversationData']);    

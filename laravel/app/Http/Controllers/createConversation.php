@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class createConversation extends Controller
@@ -20,12 +21,12 @@ class createConversation extends Controller
         $user = $request->user();
         $receiverId = $request->input('receiver_id');
         $checkConversation = Conversation::where('receiver_id',  $user->id)->where('sender_id', $receiverId)->orWhere('receiver_id', $receiverId)->where('sender_id', $user->id)->get();
-        if(count($checkConversation) == 0)
-        {
+        if(count($checkConversation) == 0){
             $createdConversation = Conversation::create([
-                'receiver_id' => $receiverId , 
-                'sender_id' => $user->id, 
-                'last_message' => 'Click to start chat',
+                    'receiver_id' => $receiverId , 
+                    'sender_id' => $user->id, 
+                    'last_message' => 'Click to start chat',
+                    'sender_read_at' => Carbon::now(),
                 ]);
             $createMessage = Message::create(['conversation_id'=> $createdConversation->id, 'sender_id' => $user->id]);
             $createdConversation->last_time_message = $createMessage->created_at;
@@ -43,6 +44,20 @@ class createConversation extends Controller
         return response()->json([
             'chats' => $conversations,
         ], 200);
+    }
+
+    public function markConversationAsRead(Request $request)
+    {   
+        $conversation = Conversation::find($request->get('conversation_id'));
+        if($conversation->sender_id == $request->get('userId')){
+            $conversation->update([
+                'sender_read_at' => Carbon::now(),
+            ]);
+        } else {
+            $conversation->update([
+                'receiver_read_at' => Carbon::now(),
+            ]);
+        }
     }
 
     public function searchUser(Request $request)
@@ -68,7 +83,18 @@ class createConversation extends Controller
             'body' => $message,
         ]);
         $conversation = Conversation::find($conversationId);
-        $conversation->update(['last_time_message' => $createdMessage->created_at]);
+        if($conversation->sender_id == $request->get('userId')){
+            $conversation->update([
+                'last_time_message' => $createdMessage->created_at,
+                'sender_read_at' => Carbon::now(),
+            ]);
+        } else {
+            $conversation->update([
+                'last_time_message' => $createdMessage->created_at,
+                'receiver_read_at' => Carbon::now(),
+            ]);
+        }
+    
         $countWords = strlen($message);
         if($countWords <= 52){
             $conversation->update(['last_message' => $message]);
@@ -78,9 +104,7 @@ class createConversation extends Controller
             $conversation->update(['last_message' => $cuttedMessage]);
         }
             broadcast(new MessageSent($conversation, $message))->toOthers();      
-    
         return response()->json(['success' => 'Message sent!'], 201);
-
     }
 
     public function showChat(Request $request, $id)

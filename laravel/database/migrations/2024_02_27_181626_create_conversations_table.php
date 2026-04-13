@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreign('receiver_id')->references('id')->on('users');
             $table->timestamp('last_time_message')->nullable();
             $table->string('last_message');
+            $table->timestamp('sender_read_at')->nullable();
+            $table->timestamp('receiver_read_at')->nullable();
             $table->timestamps();
         });
     }
